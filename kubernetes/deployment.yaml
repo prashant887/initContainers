@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: init-container
+  namespace: demo-namespace
+spec:
+  selector:
+    matchLabels:
+      app: init-container
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: init-container
+    spec:
+      volumes:
+        - name: log-path
+          hostPath:
+            path: /Users/pl465j/projects/initContainers/log
+        - name: empty-dir
+          emptyDir: {}
+      containers:
+      - name: appmain
+        image: appmain:latest
+        imagePullPolicy: Never
+        volumeMounts:
+          - name: log-path
+            mountPath: /log/
+          - name: empty-dir
+            mountPath: /input
+      initContainers:
+        - name: appinit
+          image: appinit:latest
+          imagePullPolicy: Never
+          volumeMounts:
+            - name: empty-dir
+              mountPath: /output
+            - name: log-path
+              mountPath: /log/
